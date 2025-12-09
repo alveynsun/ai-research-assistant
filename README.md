@@ -3,9 +3,9 @@
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
 [![LangChain](https://img.shields.io/badge/LangChain-0.1+-orange.svg)](https://www.langchain.com/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)](https://streamlit.io/)
-[![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-green.svg)](https://ollama.ai/)
+[![AI Models](https://img.shields.io/badge/AI%20Models-Ollama%20%7C%20OpenAI%20%7C%20Azure%20%7C%20...-green.svg)](https://python.langchain.com/docs/integrations/chat/)
 
-**AI驱动的智能科研文献助手** - 将个人文献库转化为可交互的知识大脑，基于RAG技术实现智能检索、分析和总结。
+**AI驱动的智能科研文献助手** - 基于RAG技术的跨平台智能文献管理系统，支持多种大语言模型，将个人文献库转化为可交互的知识大脑。
 
 ## ✨ 核心功能
 
@@ -27,50 +27,79 @@
 - **文献综述生成**：基于知识库自动生成Related Work段落
 - **研究头脑风暴**：基于现有文献激发新研究思路
 
-### 🎯 特色亮点
-- **完全本地化**：使用Ollama本地部署，数据不出本地
-- **隐私保护**：所有文献数据存储在本地
-- **学术专用**：针对学术论文特点优化处理流程
-- **开箱即用**：简单配置即可开始使用
+### 🔄 多模型支持
+- **全模型兼容**：支持Ollama、OpenAI、Azure OpenAI、Anthropic、Google等主流大模型
+- **灵活切换**：通过简单配置即可更换不同模型
+- **混合部署**：检索和生成可使用不同模型
 
 ## 🚀 快速开始
 
 ### 环境要求
 - Python 3.9+
-- Ollama (需安装Qwen2.5模型)
-- 至少8GB RAM (推荐16GB+)
+- 支持的大语言模型（任选一种）:
+  - [Ollama](https://ollama.ai/)（本地部署，推荐）
+  - [OpenAI API](https://platform.openai.com/)（云端API）
+  - [Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service)
+  - [Google Gemini](https://ai.google.dev/)
+  - [Anthropic Claude](https://www.anthropic.com/)
+  - 其他LangChain支持的大模型
 
-### 1. 安装Ollama并下载模型
-```bash
-# 安装Ollama (请参考官方文档)
-# https://ollama.ai/
-
-# 下载所需模型
-ollama pull qwen2.5:7b
-ollama pull nomic-embed-text  # 或使用其他嵌入模型
-```
-
-### 2. 克隆项目并安装依赖
+### 1. 安装依赖
 ```bash
 git clone https://github.com/yourusername/ai-research-assistant.git
 cd ai-research-assistant
 
-# 安装依赖
+# 安装核心依赖
 pip install -r requirements.txt
+
+# 根据选择的模型安装额外依赖
+# 如果使用OpenAI: pip install openai
+# 如果使用Azure: pip install openai azure-identity
+# 如果使用Anthropic: pip install anthropic
 ```
 
-### 3. 配置项目
-```bash
-# 创建必要的目录
-mkdir -p data/papers db/chroma
+### 2. 配置大语言模型（选择一种方式）
 
-# 编辑配置文件 (可选)
-# 修改 src/config.py 调整模型和参数
+#### 方式一：使用Ollama（本地推荐）
+```bash
+# 安装Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# 下载模型（例如Qwen2.5）
+ollama pull qwen2.5:7b
+ollama pull nomic-embed-text  # 嵌入模型
+```
+
+编辑 `src/config.py`：
+```python
+# 使用Ollama模型
+LLM_MODEL = "qwen2.5:7b"
+EMBEDDING_MODEL = "nomic-embed-text"
+```
+
+#### 方式二：使用OpenAI API（云端）
+```bash
+# 设置API密钥
+export OPENAI_API_KEY="your-api-key-here"
+```
+
+编辑 `src/config.py`：
+```python
+# 切换为OpenAI
+from langchain_openai import ChatOpenAI
+llm = ChatOpenAI(model="gpt-4", temperature=0.3)
+```
+
+#### 方式三：使用其他模型服务
+系统支持任何LangChain兼容的模型，配置方式类似。
+
+### 3. 创建必要的目录
+```bash
+mkdir -p data/papers db/chroma
 ```
 
 ### 4. 运行应用
 ```bash
-# 启动Streamlit应用
 streamlit run app.py
 ```
 
@@ -86,7 +115,7 @@ streamlit run app.py
 ai-research-assistant/
 ├── app.py                 # Streamlit主界面
 ├── src/                   # 核心代码
-│   ├── config.py          # 配置文件
+│   ├── config.py          # 配置文件（可修改模型设置）
 │   ├── chains.py          # LLM功能链
 │   ├── knowledge_base.py  # 向量知识库管理
 │   └── paper_loader.py    # 论文解析器
@@ -95,6 +124,7 @@ ai-research-assistant/
 ├── db/
 │   └── chroma/            # 向量数据库存储
 ├── requirements.txt       # Python依赖
+├── .env.example          # 环境变量示例
 └── README.md             # 项目说明
 ```
 
@@ -102,12 +132,21 @@ ai-research-assistant/
 
 ### 模型配置 (src/config.py)
 ```python
-# 主要可配置项
-LLM_MODEL = "qwen2.5:7b"          # 主模型
-EMBEDDING_MODEL = "qwen2.5:7b"    # 嵌入模型
+# 主要可配置项 - 可根据需要切换不同模型
+LLM_MODEL = "qwen2.5:7b"          # 主模型（可替换为gpt-4, claude-3等）
+EMBEDDING_MODEL = "qwen2.5:7b"    # 嵌入模型（可使用text-embedding-ada-002等）
 TEMPERATURE = 0.3                 # 生成温度
 RETRIEVER_K = 5                   # 检索返回数量
 CHUNK_SIZE = 1000                 # 文本分块大小
+
+# 可扩展为支持更多模型提供商
+SUPPORTED_MODELS = {
+    "ollama": ["qwen2.5:7b", "llama3.2", "mistral", "gemma"],
+    "openai": ["gpt-4", "gpt-3.5-turbo"],
+    "anthropic": ["claude-3-opus", "claude-3-sonnet"],
+    "google": ["gemini-pro"],
+    "azure": ["gpt-4", "gpt-35-turbo"]
+}
 ```
 
 ### 支持的论文格式
@@ -151,7 +190,11 @@ graph TD
     C --> E[向量数据库 Chroma]
     C --> F[文档解析器]
     
-    D --> G[本地大模型 Ollama]
+    D --> G{大模型选择}
+    G --> G1[Ollama 本地]
+    G --> G2[OpenAI API]
+    G --> G3[Azure OpenAI]
+    G --> G4[其他模型]
     D --> H[RAG检索增强]
     
     F --> I[PDF解析 PyPDF]
@@ -168,7 +211,31 @@ graph TD
 1. **文档处理层**：PDF解析、文本分割、元数据提取
 2. **向量存储层**：ChromaDB存储和检索嵌入向量
 3. **RAG引擎层**：检索增强生成，结合上下文和LLM
-4. **应用层**：Streamlit Web界面，用户交互
+4. **模型抽象层**：支持多种大语言模型提供商
+5. **应用层**：Streamlit Web界面，用户交互
+
+### 多模型支持架构
+系统采用LangChain的模型抽象层，可以无缝切换不同的大语言模型：
+
+```python
+# 示例：配置不同的模型提供商
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_community.chat_models import ChatOllama
+
+# OpenAI配置
+llm_openai = ChatOpenAI(model="gpt-4", api_key="your-key")
+
+# Anthropic配置  
+llm_claude = ChatAnthropic(model="claude-3-sonnet", api_key="your-key")
+
+# Google配置
+llm_gemini = ChatGoogleGenerativeAI(model="gemini-pro", api_key="your-key")
+
+# Ollama配置（默认）
+llm_ollama = ChatOllama(model="qwen2.5:7b")
+```
 
 ## 🤝 参与贡献
 
@@ -187,30 +254,52 @@ graph TD
 - [ ] 集成外部学术数据库
 - [ ] 增加协作功能
 - [ ] 开发移动端应用
+- [ ] 添加更多大模型支持
 
 ## ❓ 常见问题
 
-### Q: 需要什么硬件配置？
-**A:** 推荐16GB+ RAM，使用Qwen2.5-7B模型至少需要8GB内存。CPU模式可运行，GPU加速效果更佳。
-
 ### Q: 支持哪些大语言模型？
-**A:** 支持所有Ollama支持的模型，推荐使用7B参数以上的模型以获得更好效果。
+**A:** 系统支持所有LangChain兼容的大语言模型，包括但不限于：
+- **本地模型**：Ollama（Qwen、Llama、Mistral、Gemma等）
+- **云端API**：OpenAI GPT系列、Anthropic Claude、Google Gemini
+- **企业版**：Azure OpenAI、本地部署的私有模型
+- **开源模型**：通过Ollama或本地部署的任何开源模型
+
+### Q: 如何切换不同的大模型？
+**A:** 只需修改 `src/config.py` 中的模型配置，并根据需要安装相应的Python包即可。系统架构设计为模型无关，切换模型不影响其他功能。
+
+### Q: 需要什么硬件配置？
+**A:** 配置要求取决于选择的模型：
+- **Ollama本地模型**：推荐16GB+ RAM，7B模型至少需要8GB内存
+- **云端API模型**：只需要网络连接，无特殊硬件要求
+- **混合模式**：可以使用云端模型进行生成，本地模型进行检索
 
 ### Q: 我的论文数据安全吗？
-**A:** 完全安全！所有处理都在本地进行，不会上传到任何云端服务器。
+**A:** 完全安全！系统支持多种部署方式：
+- **完全本地**：使用Ollama，数据不出本地
+- **混合部署**：敏感检索在本地，生成使用云端API
+- **完全云端**：所有处理在云端，适合无本地硬件的情况
 
 ### Q: 能处理中文论文吗？
-**A:** 是的！特别是使用Qwen等中文优化模型时，对中文论文支持良好。
+**A:** 是的！系统支持多语言处理，特别是使用Qwen、GPT-4等多语言模型时，对中文论文支持良好。
 
 ### Q: 最多能支持多少篇论文？
-**A:** 取决于磁盘空间和内存，理论上可以支持上千篇论文。
+**A:** 取决于磁盘空间和内存，理论上可以支持上千篇论文。使用云端向量数据库可进一步扩展。
+
+### Q: 如何添加对新模型的支持？
+**A:** 系统基于LangChain构建，任何LangChain支持的模型都可以通过简单的配置集成。参考LangChain官方文档添加新模型集成。
+
+## 📄 许可证
+
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
 
 ## 🙏 致谢
 
-- [LangChain](https://github.com/langchain-ai/langchain) - LLM应用框架
+- [LangChain](https://github.com/langchain-ai/langchain) - LLM应用框架，提供模型抽象层
 - [Ollama](https://ollama.ai/) - 本地大模型运行环境
 - [Chroma](https://www.trychroma.com/) - 向量数据库
 - [Streamlit](https://streamlit.io/) - 快速构建数据应用
+- 所有支持的大模型提供商和开源社区
 
 ## 📞 联系方式
 
