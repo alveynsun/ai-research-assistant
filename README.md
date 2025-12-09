@@ -37,7 +37,7 @@
 ### 环境要求
 - Python 3.9+
 - 支持的大语言模型（任选一种）:
-  - [Ollama](https://ollama.ai/)（本地部署，推荐）
+  - [Ollama](https://ollama.ai/)（本地部署）
   - [OpenAI API](https://platform.openai.com/)（云端API）
   - [Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service)
   - [Google Gemini](https://ai.google.dev/)
@@ -67,14 +67,13 @@ curl -fsSL https://ollama.ai/install.sh | sh
 
 # 下载模型（例如Qwen2.5）
 ollama pull qwen2.5:7b
-ollama pull nomic-embed-text  # 嵌入模型
 ```
 
 编辑 `src/config.py`：
 ```python
 # 使用Ollama模型
 LLM_MODEL = "qwen2.5:7b"
-EMBEDDING_MODEL = "nomic-embed-text"
+EMBEDDING_MODEL = "qwen2.5:7b"
 ```
 
 #### 方式二：使用OpenAI API（云端）
