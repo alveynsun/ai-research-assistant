@@ -176,33 +176,6 @@ SUPPORTED_MODELS = {
 - 进行研究想法的头脑风暴
 - 所有生成内容可复制使用
 
-## 🛠️ 技术架构
-
-```mermaid
-graph TD
-    A[用户界面 Streamlit] --> B[功能调度]
-    B --> C[知识库管理]
-    B --> D[LLM功能链]
-    
-    C --> E[向量数据库 Chroma]
-    C --> F[文档解析器]
-    
-    D --> G{大模型选择}
-    G --> G1[Ollama 本地]
-    G --> G2[OpenAI API]
-    G --> G3[Azure OpenAI]
-    G --> G4[其他模型]
-    D --> H[RAG检索增强]
-    
-    F --> I[PDF解析 PyPDF]
-    F --> J[文本分割]
-    
-    E --> K[语义搜索]
-    H --> K
-    
-    K --> L[答案生成]
-    L --> M[返回结果]
-```
 
 ### 核心组件
 1. **文档处理层**：PDF解析、文本分割、元数据提取
